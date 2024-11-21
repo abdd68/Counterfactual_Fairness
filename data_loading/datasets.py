@@ -9,20 +9,60 @@ from collections import namedtuple
 
 dirname = os.path.dirname(__file__)
 
+def read_law_school(label='ZFYA', sensitive_attribute='race', fold=1):
+    """
+    Load and process the law school dataset.
+    
+    Args:
+        label (str): Name of the target column.
+        sensitive_attribute (str): Name of the sensitive attribute column.
+        fold (int): Fold for cross-validation (if applicable, currently unused).
+
+    Returns:
+        X_train, y_train, sensitive_train, X_test, y_test, sensitive_test
+    """
+    # Load the dataset
+    data = pd.read_csv('data_loading/law_data.csv')
+    
+    # Shuffle the data
+    data = data.sample(frac=1, random_state=fold).reset_index(drop=True)
+
+    # Extract sensitive attribute, target, and features
+    y = data[label].values
+    sensitive = data[sensitive_attribute].values
+    to_drop = [label, sensitive_attribute]
+
+    # Remaining columns are features
+    X = data.drop(columns=to_drop).values
+
+    # Split into train and test sets
+    X_train, X_test, y_train, y_test, sensitive_train, sensitive_test = train_test_split(
+        X, y, sensitive, test_size=0.2, random_state=fold
+    )
+
+    return X_train, y_train, sensitive_train, X_test, y_test, sensitive_test
+
 
 def read_dataset(name, label=None, sensitive_attribute=None, fold=None):
+    print("hello there")
     if name == 'crimes':
         y_name = label if label is not None else 'ViolentCrimesPerPop'
         z_name = sensitive_attribute if sensitive_attribute is not None else 'racepctblack'
         fold_id = fold if fold is not None else 1
         return read_crimes(label=y_name, sensitive_attribute=z_name, fold=fold_id)
-    if name=='adult':
+    elif name=='adult':
         return load_adult()
+    elif name == 'law_school':
+        y_name = label if label is not None else 'ZFYA'
+        z_name = sensitive_attribute if sensitive_attribute is not None else 'race'
+        fold_id = fold if fold is not None else 1
+        return read_law_school(label=y_name, sensitive_attribute=z_name, fold=fold_id)
     else:
         raise NotImplemented('Dataset {} does not exists'.format(name))
 
 
 def read_crimes(label='ViolentCrimesPerPop', sensitive_attribute='racepctblack', fold=1):
+    
     if not os.path.isfile('communities.data'):
         urllib.request.urlretrieve(
             "http://archive.ics.uci.edu/ml/machine-learning-databases/communities/communities.data", "communities.data")
@@ -45,7 +85,7 @@ def read_crimes(label='ViolentCrimesPerPop', sensitive_attribute='racepctblack',
     # shuffle
     data = data.sample(frac=1, replace=False).reset_index(drop=True)
 
-    folds = data['fold'].astype(np.int)
+    folds = data['fold'].astype(int)
 
     y = data[label].values
     to_drop += [label]
