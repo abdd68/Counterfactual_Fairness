@@ -44,7 +44,7 @@ def read_law_school(label='ZFYA', sensitive_attribute='race', fold=1):
 
 
 def read_dataset(name, label=None, sensitive_attribute=None, fold=None):
-    print("hello there")
+    os.chdir('/codespace/fairness/Counterfactual_Fairness')
     if name == 'crimes':
         y_name = label if label is not None else 'ViolentCrimesPerPop'
         z_name = sensitive_attribute if sensitive_attribute is not None else 'racepctblack'
@@ -62,7 +62,7 @@ def read_dataset(name, label=None, sensitive_attribute=None, fold=None):
 
 
 def read_crimes(label='ViolentCrimesPerPop', sensitive_attribute='racepctblack', fold=1):
-    
+    os.chdir('/codespace/fairness/Counterfactual_Fairness')
     if not os.path.isfile('communities.data'):
         urllib.request.urlretrieve(
             "http://archive.ics.uci.edu/ml/machine-learning-databases/communities/communities.data", "communities.data")
